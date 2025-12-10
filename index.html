@@ -100,14 +100,14 @@
                         </ul>
                     </div>
                     <p class="mt-3 text-sm font-semibold">
-                        Periodo de respuesta: Diciembre 2025.
+                        Periodo de respuesta: Enero 2026.
                     </p>
                 </div>
 
                 <h2 class="text-xl font-semibold mb-4 text-center border-t pt-8">Paso 1: Identificación del Manager</h2>
                 <div class="text-center mb-6">
                      <button onclick="showCoursesModal()" class="bg-white text-blue-600 font-semibold py-2 px-4 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-                        Ver Catálogo de Cursos
+                       Ver Catálogo de Cursos
                      </button>
                 </div>
                 <div class="flex flex-col md:flex-row gap-4 items-center justify-center">
@@ -233,7 +233,7 @@
 
     <!-- Modal Catálogo -->
     <div id="courses-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0">
-        <div class="modal-content bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl transform scale-95 max-h-[80vh] flex flex-col">
+        <div class="modal-content bg-white rounded-lg shadow-xl p-6 w-full max-w-6xl transform scale-95 max-h-[80vh] flex flex-col">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold">Catálogo de Cursos</h3>
                 <button onclick="hideCoursesModal()" class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
@@ -276,7 +276,7 @@
     <script>
         // --- CONFIGURACIÓN ---
         // URL segura de tu despliegue final
-        const googleAppScriptUrl = "https://script.google.com/macros/s/AKfycbxlseiRY0nPl6c2rngZigMBrrv6MOS7ilXMRcLIDCDbKxOwr-vbaNb21N7WeTeAntTU/exec";
+        const googleAppScriptUrl = "https://script.google.com/macros/s/AKfycbyLaz_04083-TTlM15W2Zr3sBDhnBr_Kmn7jxNh0T22n7laJkgH39QvbKZir0QUtx1Chw/exec";
         
         // --- VARIABLES GLOBALES ---
         let supervisorGlobal = null;
@@ -294,11 +294,14 @@
 
                 return arr.map((c) => {
                     // Mapeo defensivo
-                    if (typeof c === 'string') return { nombre: c, competencia: 'General', descripcion: '' };
+                    if (typeof c === 'string') return { nombre: c, competencia: 'General', descripcion: '', duracion: '', costo: '' };
                     return {
                         nombre: c.nombre || c.name || c.curso || c.titulo || '',
                         competencia: c.competencia || c.skill || c.categoria || 'General',
-                        descripcion: c.descripcion || c.description || c.detalle || ''
+                        descripcion: c.descripcion || c.description || c.detalle || '',
+                        // Se agregan campos de Duración y Costo
+                        duracion: c.duracion || c.duration || c.tiempo || '',
+                        costo: c.costo || c.cost || c.precio || ''
                     };
                 }).filter((c) => c && c.nombre);
             } catch (e) {
@@ -456,8 +459,8 @@
 
                 const empresaBadge = employee.Empresa 
                     ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-600 border border-gray-300 mt-1">
-                         🏢 ${employee.Empresa}
-                       </span>` 
+                          🏢 ${employee.Empresa}
+                        </span>` 
                     : '';
 
                 employeeCard.innerHTML = `
@@ -632,7 +635,7 @@
                     modalidad: modalidad,
                     sincronia: (modalidad === 'Virtual') ? sincronia : ''
                 },
-                evaluaciones: evaluations
+                evaluations: evaluations
             };
             
             lastSubmissionData = payload;
@@ -790,7 +793,7 @@
             
             const table = document.createElement('table');
             table.className = 'w-full text-sm text-left';
-            const thead = `<thead><tr class="border-b"><th class="py-2 pr-2 font-semibold">Cursos</th><th class="py-2 px-2 font-semibold">Skill</th><th class="py-2 pl-2 font-semibold">Descripción</th></tr></thead>`;
+            const thead = `<thead><tr class="border-b"><th class="py-2 pr-2 font-semibold">Cursos</th><th class="py-2 px-2 font-semibold">Skill</th><th class="py-2 px-2 font-semibold">Duración</th><th class="py-2 px-2 font-semibold">Costo</th><th class="py-2 pl-2 font-semibold">Descripción</th></tr></thead>`;
             const tbody = document.createElement('tbody');
 
             filteredCourses.forEach(courseObj => {
@@ -799,7 +802,9 @@
                 tr.innerHTML = `
                     <td class="py-2 pr-2 font-medium">${courseObj.nombre || ''}</td>
                     <td class="py-2 px-2 text-gray-600">${courseObj.competencia || 'General'}</td>
-                    <td class="py-2 pl-2 text-gray-500">${courseObj.descripcion || ''}</td>
+                    <td class="py-2 px-2 text-gray-600 whitespace-nowrap">${courseObj.duracion || '-'}</td>
+                    <td class="py-2 px-2 text-gray-600 whitespace-nowrap">${courseObj.costo || '-'}</td>
+                    <td class="py-2 pl-2 text-gray-500 text-sm">${courseObj.descripcion || ''}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -860,8 +865,8 @@
 
             allCourses.forEach(courseObj => {
                 const nameText = `• ${courseObj.nombre}`;
-                const skillText = `   Skill: ${courseObj.competencia || 'General'}`;
-                const descText = `   ${courseObj.descripcion || 'Sin descripción disponible.'}`;
+                const metaText = `    Skill: ${courseObj.competencia || 'General'} | Duración: ${courseObj.duracion || 'N/A'} | Costo: ${courseObj.costo || 'N/A'}`;
+                const descText = `    ${courseObj.descripcion || 'Sin descripción disponible.'}`;
 
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(11);
@@ -869,13 +874,13 @@
                 
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(10);
-                const skillLines = doc.splitTextToSize(skillText, 180);
+                const metaLines = doc.splitTextToSize(metaText, 180);
 
                 doc.setFont("helvetica", "normal");
                 doc.setFontSize(10);
                 const descLines = doc.splitTextToSize(descText, 170);
 
-                const blockHeight = (nameLines.length * 6) + (skillLines.length * 5) + (descLines.length * 5) + 8;
+                const blockHeight = (nameLines.length * 6) + (metaLines.length * 5) + (descLines.length * 5) + 8;
 
                 if (y + blockHeight > 280) {
                     doc.addPage();
@@ -892,8 +897,8 @@
                 doc.setFont("helvetica", "bold"); 
                 doc.setFontSize(10);
                 doc.setTextColor(80); 
-                doc.text(skillLines, 14, y);
-                y += (skillLines.length * 5);
+                doc.text(metaLines, 14, y);
+                y += (metaLines.length * 5);
 
                 doc.setFont("helvetica", "normal");
                 doc.setFontSize(10);
@@ -918,5 +923,3 @@
     </script>
 </body>
 </html>
-
-
